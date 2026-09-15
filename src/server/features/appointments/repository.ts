@@ -42,7 +42,7 @@ export const appointmentsRepository = {
       with: { patient: true },
     }),
 
-  /** Insert or update by the scheduler's booking id. */
+  /** Insert or update by the Cal booking uid. */
   upsertByExternalId: async (input: {
     externalBookingId: string
     patientId: string

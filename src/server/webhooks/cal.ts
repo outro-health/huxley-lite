@@ -2,7 +2,7 @@ import type { AppointmentKind } from "../db/schema"
 import { appointmentsRepository } from "../features/appointments/repository"
 import { cliniciansRepository } from "../features/clinicians/repository"
 import { patientsRepository } from "../features/patients/repository"
-import type { CalWebhook } from "../integrations/scheduler"
+import type { CalWebhook } from "../integrations/cal"
 import {
   type AppResultAsync,
   appError,
@@ -44,7 +44,7 @@ const resolveParties = (hook: CalWebhook) =>
   })
 
 /**
- * Booking webhooks from the scheduler. Upserts on the booking uid so a
+ * Booking webhooks from Cal.com. Upserts on the booking uid so a
  * retried webhook is harmless.
  */
 export const handleCalWebhook = (

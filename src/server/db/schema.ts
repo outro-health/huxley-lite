@@ -144,7 +144,7 @@ export const stageTransitions = pgTable(
 
 // ---------------------------------------------------------------------------
 // Appointments. `flag` is NULL when the appointment happened as expected.
-// Bookings come from the (fake) scheduler via webhooks; `externalBookingId`
+// Bookings come from Cal.com via webhooks; `externalBookingId`
 // is its id.
 // ---------------------------------------------------------------------------
 

@@ -9,8 +9,8 @@ shaped like the product.
 The database is embedded Postgres (PGlite), so there is nothing to install.
 The EHR and email provider are hosted sandbox services; you'll get an API
 key for them (see `.env.example` and `docs/integrations/`). Without a key
-the app falls back to in-process fakes. The scheduler only talks to us via
-webhooks and is simulated by a script. The AI helper falls back to canned
+the app falls back to in-process fakes. Cal.com (booking) only talks to us
+via webhooks, and a script stands in for it locally. The AI helper falls back to canned
 text when there is no key.
 
 ## Run it
@@ -31,7 +31,7 @@ npm run typecheck
 npm run lint
 npm run db:reset       # wipe local data; next `npm run dev` re-seeds
 npm run db:generate    # after editing src/server/db/schema.ts
-npx tsx scripts/simulate-cal.ts storm chloe.carter@example.com   # scheduler webhooks
+npx tsx scripts/simulate-cal.ts storm chloe.carter@example.com   # fake Cal.com webhooks
 ```
 
 ## What a clinician can do
@@ -45,7 +45,7 @@ npx tsx scripts/simulate-cal.ts storm chloe.carter@example.com   # scheduler web
   not. Eligible patients get an EHR chart and follow-up work.
 - **Appointments**: see the schedule, mark an appointment completed
   (completing the evaluation moves the patient to `decision_pending`), or
-  flag it (no-show, late cancel, ...). Bookings arrive from the scheduler by
+  flag it (no-show, late cancel, ...). Bookings arrive from Cal.com by
   webhook.
 - **Tasks**: an inbox of things that need a clinician. Tasks are created by
   rules reacting to events. The one type today is *send welcome email*:
@@ -58,16 +58,21 @@ and the client sends that id in an `x-clinician-id` header.
 
 ## How it fits together
 
-```
- clinician ──▶ tRPC router ──▶ service ──▶ repository ──▶ Postgres (PGlite)
-                                 │
-                                 └──▶ enqueueEvent() ──▶ outbox_events
-                                                              │
-        scheduler / email provider ──▶ /webhooks/* ──▶ service ─┘
-                                                              │
-                                     worker (every 1s) ◀──────┘
-                                        │
-                                        └──▶ handlers: task rules, EHR sync, ...
+```mermaid
+flowchart LR
+  clinician([Clinician]) --> router[tRPC router]
+  router --> service[Service]
+  service --> repo[Repository]
+  repo --> db[(Postgres / PGlite)]
+  service --> enqueue[enqueueEvent]
+  enqueue --> outbox[(outbox_events)]
+  cal[Cal.com] -- booking webhooks --> webhooks["/webhooks/cal"]
+  webhooks --> service
+  outbox --> worker[Worker, every 1s]
+  worker --> handlers[Handlers: task rules, EHR sync]
+  handlers --> ehr[EHR API]
+  service --> mail[Mail API]
+  mail -. status polled .-> reconcile[Email reconciler]
 ```
 
 Events are written in the same request as the change that caused them. A
@@ -103,8 +108,8 @@ src/server/
   lib/result.ts            Result helpers (neverthrow)
   lib/ai.ts                LLM wrapper (Claude, or a fake). Unused so far.
   outbox/                  enqueue, worker, handler registry
-  webhooks/                inbound: scheduler bookings, email delivery reports
-  integrations/            EHR and mail clients (HTTP, or local fakes), scheduler payload shapes
+  webhooks/                inbound: Cal.com bookings, email delivery reports
+  integrations/            EHR and mail clients (HTTP, or local fakes), Cal webhook shapes
   features/emails/reconcile.ts   polls the mail API for delivery status
   features/<domain>/       repository.ts, service.ts, router.ts per domain
   features/careModel/stages.ts   the stage machine

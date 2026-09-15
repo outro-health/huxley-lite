@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http"
 
-import { ZCalWebhook } from "../integrations/scheduler"
+import { ZCalWebhook } from "../integrations/cal"
 import { handleCalWebhook } from "./cal"
 import { handleEmailWebhook, ZEmailWebhook } from "./email"
 

@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-// Stand-in for the scheduling engine (Cal.com). We don't call it; it calls us
+// Cal.com, where patients book. We don't call it; it calls us
 // with booking webhooks (see webhooks/cal.ts). This is the shape of those.
 //
 // Cal semantics worth knowing:

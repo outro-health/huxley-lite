@@ -1,4 +1,4 @@
-// Fire scheduler webhooks at the running API, the way Cal.com would.
+// Fire Cal.com booking webhooks at the running API.
 //
 //   npx tsx scripts/simulate-cal.ts book <patientEmail> [evaluation|follow_up] [daysFromNow]
 //   npx tsx scripts/simulate-cal.ts reschedule <bookingUid> [daysFromNow]

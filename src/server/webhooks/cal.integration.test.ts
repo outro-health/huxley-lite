@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { db } from "../db/client"
-import type { CalWebhook } from "../integrations/scheduler"
+import type { CalWebhook } from "../integrations/cal"
 import { createClinician, createPatient, listEvents } from "../test/fixtures"
 import { handleCalWebhook } from "./cal"
 
