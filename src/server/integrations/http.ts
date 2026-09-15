@@ -4,7 +4,7 @@ import {
   appError,
   fromPromise,
 } from "../lib/result"
-import { integrationsConfig } from "./config"
+import { integrationsConfig, integrationsProblem } from "./config"
 
 // Small fetch wrapper for the vendor APIs. Turns non-2xx into AppError and
 // keeps the vendor's error code/message so callers can branch on it.
@@ -30,6 +30,10 @@ const describe = (error: VendorError) =>
 export const vendorFetch = <T>(request: VendorRequest): AppResultAsync<T> =>
   fromPromise(
     (async () => {
+      const problem = integrationsProblem()
+      if (problem) {
+        throw new Error(problem)
+      }
       const response = await fetch(
         `${integrationsConfig.baseUrl}${request.path}`,
         {

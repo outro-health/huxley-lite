@@ -70,9 +70,9 @@ router → repository of another domain.
 ### Integrations and AI
 
 - External systems live in `src/server/integrations/` behind small interfaces
-  (`EhrClient`, `MailClient`). Each has an HTTP implementation, used when
-  `INTEGRATIONS_API_KEY` is set, and a local fake with the same behaviour,
-  used otherwise and in tests. Vendor docs are in `docs/integrations/`.
+  (`EhrClient`, `MailClient`). Each has an HTTP implementation (the default)
+  and a local stand-in with the same behaviour, used in tests and when
+  `INTEGRATIONS=local`. Vendor docs are in `docs/integrations/`.
   Services depend on the interface, never on `fetch`.
 - `lib/ai.ts` wraps the LLM. Patient data sent to a model leaves our systems:
   send the minimum the task needs, and never let generated text reach a

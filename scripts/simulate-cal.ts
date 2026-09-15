@@ -1,3 +1,5 @@
+import "dotenv/config"
+
 // Fire Cal.com booking webhooks at the running API.
 //
 //   npx tsx scripts/simulate-cal.ts book <patientEmail> [evaluation|follow_up] [daysFromNow]

@@ -8,8 +8,8 @@ shaped like the product.
 
 The database is embedded Postgres (PGlite), so there is nothing to install.
 The EHR and email provider are hosted sandbox services; you'll get an API
-key for them (see `.env.example` and `docs/integrations/`). Without a key
-the app falls back to in-process fakes. Cal.com (booking) only talks to us
+key for them (see `.env.example` and `docs/integrations/`). Tests, and
+`INTEGRATIONS=local`, use in-process stand-ins instead. Cal.com (booking) only talks to us
 via webhooks, and a script stands in for it locally. The AI helper falls back to canned
 text when there is no key.
 

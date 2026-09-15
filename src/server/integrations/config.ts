@@ -1,17 +1,29 @@
 // Which implementation of each external system to use.
 //
-// With INTEGRATIONS_API_KEY set, the EHR and email provider are real HTTP
-// services (docs in docs/integrations/). Without it, in-process fakes with
-// the same interface are used so tests and offline work still run.
+// Default is the hosted EHR and mail services (docs in docs/integrations/),
+// which need INTEGRATIONS_API_KEY. Set INTEGRATIONS=local to use in-process
+// stand-ins instead; tests do this.
 
 export type IntegrationsMode = "remote" | "local"
 
+const mode: IntegrationsMode =
+  process.env.INTEGRATIONS === "local" ? "local" : "remote"
+
 export const integrationsConfig = {
-  mode: (process.env.INTEGRATIONS_API_KEY
-    ? "remote"
-    : "local") as IntegrationsMode,
-  baseUrl: (
-    process.env.INTEGRATIONS_BASE_URL ?? "http://localhost:8787"
-  ).replace(/\/$/, ""),
+  mode,
+  baseUrl: (process.env.INTEGRATIONS_BASE_URL ?? "").replace(/\/$/, ""),
   apiKey: process.env.INTEGRATIONS_API_KEY ?? "",
+}
+
+export const integrationsProblem = (): string | null => {
+  if (mode === "local") {
+    return null
+  }
+  if (!integrationsConfig.baseUrl) {
+    return "INTEGRATIONS_BASE_URL is not set"
+  }
+  if (!integrationsConfig.apiKey) {
+    return "INTEGRATIONS_API_KEY is not set (ask Jack for a key, or set INTEGRATIONS=local)"
+  }
+  return null
 }

@@ -15,6 +15,7 @@ export default defineConfig({
     isolate: true,
     env: {
       DATABASE_DIR: "memory://",
+      INTEGRATIONS: "local",
       TZ: "UTC",
     },
     setupFiles: ["src/server/db/testSetup.ts"],

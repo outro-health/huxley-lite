@@ -1,3 +1,5 @@
+import "dotenv/config"
+
 import { rmSync } from "node:fs"
 
 const dataDir = process.env.DATABASE_DIR ?? ".data/pglite"

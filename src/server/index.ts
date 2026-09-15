@@ -1,3 +1,5 @@
+import "dotenv/config"
+
 import { createServer } from "node:http"
 
 import { createHTTPHandler } from "@trpc/server/adapters/standalone"
@@ -6,7 +8,7 @@ import { createContext } from "./context"
 import { runMigrations } from "./db/migrate"
 import { seedIfEmpty } from "./db/seed"
 import { startEmailReconciler } from "./features/emails/reconcile"
-import { integrationsConfig } from "./integrations/config"
+import { integrationsConfig, integrationsProblem } from "./integrations/config"
 import { ai } from "./lib/ai"
 import { startWorker } from "./outbox/worker"
 import { appRouter } from "./router"
@@ -36,6 +38,13 @@ async function main() {
     }
     trpc(req, res)
   })
+
+  const problem = integrationsProblem()
+  if (problem) {
+    console.warn(
+      `\n[integrations] ${problem}. EHR and email calls will fail until this is fixed. See .env.example.\n`,
+    )
+  }
 
   const stopWorker = startWorker(1000)
   const stopReconciler = startEmailReconciler(3000)
