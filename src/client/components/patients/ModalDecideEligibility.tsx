@@ -34,9 +34,11 @@ const OPTIONS: { value: Decision; label: string; description: string }[] = [
 export function ModalDecideEligibility({
   patientId,
   patientName,
+  revising = false,
 }: {
   patientId: string
   patientName: string
+  revising?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const [decision, setDecision] = useState<Decision | null>(null)
@@ -62,7 +64,9 @@ export function ModalDecideEligibility({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="primary">Decide eligibility</Button>
+        <Button variant={revising ? "secondary" : "primary"}>
+          {revising ? "Revise decision" : "Decide eligibility"}
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogTitle>Eligibility decision</DialogTitle>

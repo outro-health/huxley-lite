@@ -1,3 +1,4 @@
+import type { CareStage } from "@server/db/schema"
 import { createFileRoute } from "@tanstack/react-router"
 
 import { AppointmentRowActions } from "@/components/appointments/AppointmentRowActions"
@@ -7,23 +8,27 @@ import { TransitionHistory } from "@/components/careModel/TransitionHistory"
 import { EmailStatusBadge } from "@/components/emails/EmailStatusBadge"
 import { ModalDecideEligibility } from "@/components/patients/ModalDecideEligibility"
 import { StageBadge } from "@/components/patients/StageBadge"
-import { TaskActions } from "@/components/tasks/TaskActions"
-import { TaskTypeBadge } from "@/components/tasks/TaskTypeBadge"
-import { Badge } from "@/components/ui/Badge"
+import { TaskList } from "@/components/tasks/TaskList"
 import { Card, CardTitle } from "@/components/ui/Card"
 import { PageHeader, Spinner } from "@/components/ui/PageHeader"
 import { EmptyRow, Table, Td, Th } from "@/components/ui/Table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs"
 import { api } from "@/lib/api"
-import { fmtDate, fmtDateTime, fmtDue, fullName } from "@/lib/format"
+import { fmtDate, fmtDateTime, fullName } from "@/lib/format"
 
 export const Route = createFileRoute("/patients/$patientId")({
   component: PatientPage,
 })
 
+const canDecide = (stage: CareStage) =>
+  stage === "decision_pending" || stage === "eligible" || stage === "ineligible"
+
 function PatientPage() {
   const { patientId } = Route.useParams()
-  const patient = api.patients.get.useQuery({ patientId })
+  const patient = api.patients.get.useQuery(
+    { patientId },
+    { refetchInterval: 3000 },
+  )
 
   if (patient.isPending) {
     return <Spinner />
@@ -50,18 +55,13 @@ function PatientPage() {
         }
         description={`${p.email} · ${p.state} · DOB ${p.dateOfBirth}`}
         actions={
-          <>
-            {p.enrollment && (
-              <ModalCorrectStage
-                patientId={p.id}
-                currentStage={p.enrollment.stage}
-              />
-            )}
+          p.enrollment && canDecide(p.enrollment.stage) ? (
             <ModalDecideEligibility
               patientId={p.id}
               patientName={fullName(p)}
+              revising={p.enrollment.stage !== "decision_pending"}
             />
-          </>
+          ) : null
         }
       />
 
@@ -114,6 +114,18 @@ function PatientPage() {
         </TabsContent>
 
         <TabsContent value="careModel">
+          {p.enrollment && (
+            <div className="mb-4 flex items-center justify-between gap-4 rounded-lg border border-hairline bg-card px-4 py-3">
+              <p className="text-muted-foreground">
+                Every stage change is recorded below. If a patient is in the
+                wrong stage because of a mistake, correct it here.
+              </p>
+              <ModalCorrectStage
+                patientId={p.id}
+                currentStage={p.enrollment.stage}
+              />
+            </div>
+          )}
           <TransitionHistory patientId={patientId} />
         </TabsContent>
         <TabsContent value="appointments">
@@ -174,50 +186,24 @@ function PatientAppointments({ patientId }: { patientId: string }) {
 }
 
 function PatientTasks({ patientId }: { patientId: string }) {
-  const tasks = api.tasks.listForPatient.useQuery({ patientId })
+  const tasks = api.tasks.listForPatient.useQuery(
+    { patientId },
+    { refetchInterval: 3000 },
+  )
   if (tasks.isPending) {
     return <Spinner />
   }
-  return (
-    <Table>
-      <thead>
-        <tr>
-          <Th>Task</Th>
-          <Th>Status</Th>
-          <Th>Due</Th>
-          <Th />
-        </tr>
-      </thead>
-      <tbody>
-        {tasks.data?.length === 0 && <EmptyRow colSpan={4}>No tasks.</EmptyRow>}
-        {tasks.data?.map((task) => (
-          <tr key={task.id}>
-            <Td>
-              <div className="flex items-center gap-2">
-                <TaskTypeBadge type={task.type} />
-                <span className="font-medium">{task.title}</span>
-              </div>
-            </Td>
-            <Td>
-              <Badge variant={task.status === "open" ? "info" : "neutral"}>
-                {task.status}
-              </Badge>
-            </Td>
-            <Td className="whitespace-nowrap text-sm text-muted-foreground">
-              {fmtDue(task.dueAt)}
-            </Td>
-            <Td>
-              <TaskActions task={task} />
-            </Td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
-  )
+  if (tasks.data?.length === 0) {
+    return <p className="py-8 text-center text-muted-foreground">No tasks.</p>
+  }
+  return <TaskList tasks={tasks.data ?? []} showPatient={false} />
 }
 
 function PatientEmails({ patientId }: { patientId: string }) {
-  const emails = api.emails.listForPatient.useQuery({ patientId })
+  const emails = api.emails.listForPatient.useQuery(
+    { patientId },
+    { refetchInterval: 3000 },
+  )
   if (emails.isPending) {
     return <Spinner />
   }
