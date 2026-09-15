@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tokens from Huxley's DESIGN.md: warm paper + ink, colour used sparingly. */
+:root {
+  --background: 40 33% 98%;
+  --sunken: 50 20% 95%;
+  --card: 0 0% 100%;
+  --foreground: 36 14% 7%;
+  --muted-foreground: 36 14% 40%;
+  --subtle-foreground: 36 10% 58%;
+  --border: 50 20% 88%;
+  --hairline: 48 22% 92%;
+  --muted: 40 10% 94%;
+  --primary: 36 14% 7%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 194 100% 33%;
+  --accent-hover: 194 99% 26%;
+  --accent-foreground: 0 0% 100%;
+  --success: 148 54% 40%;
+  --success-muted: 143 42% 93%;
+  --warning: 38 80% 41%;
+  --warning-muted: 42 75% 92%;
+  --info: 217 82% 49%;
+  --info-muted: 218 100% 95%;
+  --danger: 358 75% 59%;
+  --danger-muted: 358 80% 95%;
+  --danger-foreground: 0 0% 100%;
+}
+
+html {
+  font-feature-settings: "cv11", "ss01";
+}
+
+body {
+  @apply bg-background text-foreground text-base antialiased;
+}
