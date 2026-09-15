@@ -67,7 +67,7 @@ export const processOnce = async (
     await outboxRepository.markFailed({
       id: event.id,
       attempts,
-      error: `${outcome.error.code}: ${outcome.error.message}`,
+      error: outcome.error.message,
       nextAttemptAt: new Date(now.getTime() + backoffMs(attempts)),
       dead,
     })
