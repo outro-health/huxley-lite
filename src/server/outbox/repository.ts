@@ -82,10 +82,18 @@ export const outboxRepository = {
       })
       .where(eq(schema.outboxEvents.id, input.id)),
 
-  /** Put an event back on the queue regardless of its state. */
+  /**
+   * Put an event back on the queue regardless of its state, with a fresh
+   * set of attempts. Used by the Redeliver button.
+   */
   requeue: (id: string) =>
     db
       .update(schema.outboxEvents)
-      .set({ status: "pending", nextAttemptAt: new Date(), lastError: null })
+      .set({
+        status: "pending",
+        attempts: 0,
+        nextAttemptAt: new Date(),
+        lastError: null,
+      })
       .where(eq(schema.outboxEvents.id, id)),
 }

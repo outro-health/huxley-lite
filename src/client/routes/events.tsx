@@ -17,9 +17,14 @@ function EventsPage() {
   const utils = api.useUtils()
   const redeliver = api.outbox.redeliver.useMutation({
     onSuccess: (summary) => {
-      toast.success(
-        `Redelivered: ${summary.delivered} ok, ${summary.failed} retrying, ${summary.dead} dead`,
-      )
+      const text = `Redelivered: ${summary.delivered} ok, ${summary.failed} retrying, ${summary.dead} dead`
+      if (summary.dead > 0) {
+        toast.error(`${text}. See the error on the event row.`)
+      } else if (summary.failed > 0) {
+        toast.warning(`${text}. The worker will try again.`)
+      } else {
+        toast.success(text)
+      }
       utils.invalidate()
     },
     onError: (error) => toast.error(error.message),
